@@ -5,10 +5,24 @@ from docling.document_converter import DocumentConverter
 from docling.datamodel.base_models import InputFormat
 from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode
+import configparser
+import math
 
 
 class UNIR:
     def __init__(self, file: str, config_file: str):
+        self.config = configparser.ConfigParser()
+        self.config.read(config_file)
+        self.__l_neto = int(self.config["salario_neto_UNIR_bbox"]["l"])
+        self.__t_neto = int(self.config["salario_neto_UNIR_bbox"]["t"])
+        self.__r_neto = int(self.config["salario_neto_UNIR_bbox"]["r"])
+        self.__b_neto = int(self.config["salario_neto_UNIR_bbox"]["b"])
+
+        self.__l_bruto = int(self.config["salario_bruto_UNIR_bbox"]["l"])
+        self.__t_bruto = int(self.config["salario_bruto_UNIR_bbox"]["t"])
+        self.__r_bruto = int(self.config["salario_bruto_UNIR_bbox"]["r"])
+        self.__b_bruto = int(self.config["salario_bruto_UNIR_bbox"]["b"])
+
         self.source_path = Path(file)
         pipeline_options = PdfPipelineOptions(do_table_structure=True)
         pipeline_options.table_structure_options.mode = (
@@ -36,16 +50,52 @@ class UNIR:
         return self.extraerMes()
 
     def extraerSalarioNeto(self):
-        # using regex search for string "LiQUIDO TOTAL A PERCIBIR" and return the whole line
-        import re
+        resultado = None
+        resultado = self.__find_on_texts()
+        if resultado is None:
+            resultado = self.__find_on_table_cells()
+        return resultado
 
-        pattern = r"(?:'orig'|'text'):\s*['\"]([\d,\.]+)\s*(?:€|\\u20ac)\s*LiQUIDO TOTAL A PERCIBIR"
+    def __find_on_table_cells(self, l, t, r, b):
+        diccionario = self.data["tables"][0]
+        for item in diccionario["data"]["table_cells"]:
+            for k, v in item.items():
+                if k == "bbox":
+                    match_count = sum(
+                        math.floor(v[key]) == value
+                        for key, value in zip(["l", "t", "r", "b"], [l, t, r, b])
+                    )
+                    if match_count >= 3:
+                        return float(
+                            item["text"].replace(".", "").replace(",", ".").split()[0]
+                        )
+        return None
 
-        found = re.search(pattern, str(self.data))
-        if found:
-            return float(found.group(1).replace(",", "."))
-        else:
-            print("No se ha encontrado el salario neto")
+    def __find_on_texts(self, l, t, r, b):
+        for item in self.data["texts"]:
+            for _, v in item.items():
+                if isinstance(v, list) and len(v) > 0:
+                    match_count = sum(
+                        math.floor(v[0]["bbox"][key]) == value
+                        for key, value in zip(["l", "t", "r", "b"], [l, t, r, b])
+                    )
+                    if match_count >= 3:
+                        return float(
+                            item["text"].replace(".", "").replace(",", ".").split()[0]
+                        )
+        return None
+
+    def extraerSalarioNeto(self):
+        resultado = self.__find_on_texts(self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto)
+        if resultado is None:
+            resultado = self.__find_on_table_cells(self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto)
+        return resultado
+
+    def extraerSalarioBruto(self):
+        resultado = self.__find_on_texts(self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto)
+        if resultado is None:
+            resultado = self.__find_on_table_cells(self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto)
+        return resultado
 
     def extraerMes(self):
         import re
@@ -62,33 +112,6 @@ class UNIR:
             return transform_date(f"{first_day}/{first_month}/{first_year}")
         else:
             return self.source_path.stem
-
-    def extraerSalarioBruto(self):
-        import re
-
-        pattern_dase = r"'text':\s*'([\d,\.]+)\s*DASE\sLRPF"
-        pattern_000 = r"'text':\s*'([\d,\.]+)\s*0,00"
-
-        # First try DASE LRPF
-        found = re.search(pattern_dase, str(self.data))
-        if found:
-            amount_str = found.group(1)
-        else:
-            # If not found, try 0,00
-            found = re.search(pattern_000, str(self.data))
-            if found:
-                amount_str = found.group(1)
-            else:
-                amount_str = None
-
-        if amount_str is not None:
-            return float(amount_str.replace(",", "."))
-
-        else:
-            print("No match found")
-
-    def convert_to_pd(self):
-        pass
 
     def export_to_json(self):
         import json
