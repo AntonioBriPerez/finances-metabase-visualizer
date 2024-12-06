@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List
+import hashlib
 
 # Diccionario para convertir el mes en español a su abreviatura
 meses_abrev = {
@@ -11,12 +12,24 @@ meses_abrev = {
     "Junio": "jun",
     "Julio": "jul",
     "Agosto": "ago",
-    "Septiembre": "sep",
+    "Septiembre": "sept",
     "Octubre": "oct",
     "Noviembre": "nov",
     "Diciembre": "dic",
 }
 
+def generar_hash_archivo(ruta_archivo):
+    # Crear un objeto hash SHA-256
+    sha256_hash = hashlib.sha256()
+    
+    # Abrir el archivo en modo binario
+    with open(ruta_archivo, "rb") as archivo:
+        # Leer y actualizar el hash por bloques de 4096 bytes
+        for byte_block in iter(lambda: archivo.read(4096), b""):
+            sha256_hash.update(byte_block)
+    
+    # Devolver el hash en formato hexadecimal
+    return sha256_hash.hexdigest()
 
 def convertir_fecha(fecha):
     # Dividir la cadena de fecha por espacio
@@ -47,7 +60,7 @@ def transform_date(date_str):
         "06": "jun",
         "07": "jul",
         "08": "aug",
-        "09": "sep",
+        "09": "sept",
         "10": "oct",
         "11": "nov",
         "12": "dec",
