@@ -15,7 +15,7 @@ def main():
     else:
         print("Creating new DataFrame...")
         dataframe = pd.DataFrame(
-            columns=["Fichero", "Hash", "Empresa", "salario_neto", "salario_bruto", "mes"]
+            columns=["Fichero", "Hash", "Empresa", "salario_neto", "salario_bruto", "mes", "Tipo"]
         )
 
     existing_hashes = set(dataframe["Hash"])
@@ -39,7 +39,8 @@ def main():
                 "Empresa": "UNIR",
                 "salario_neto": nomina_unir.salario_neto,
                 "salario_bruto": nomina_unir.salario_bruto,
-                "mes": nomina_unir.mes
+                "mes": nomina_unir.mes,
+                "Tipo": "Nomina"
             }, index=[0])
             dataframe = pd.concat([dataframe, new_df])
 
@@ -52,7 +53,8 @@ def main():
                 "Empresa": "UST",
                 "salario_neto": nomina_ust.salario_neto,
                 "salario_bruto": nomina_ust.salario_bruto,
-                "mes": nomina_ust.mes
+                "mes": nomina_ust.mes,
+                "Tipo": "Nomina"
             }, index=[0])
             dataframe = pd.concat([dataframe, new_df])
 
