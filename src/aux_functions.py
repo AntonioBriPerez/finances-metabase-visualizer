@@ -4,18 +4,18 @@ import hashlib
 
 # Diccionario para convertir el mes en español a su abreviatura
 meses_abrev = {
-    "Enero": "ene",
-    "Febrero": "feb",
-    "Marzo": "mar",
-    "Abril": "abr",
-    "Mayo": "may",
-    "Junio": "jun",
-    "Julio": "jul",
-    "Agosto": "ago",
-    "Septiembre": "sept",
-    "Octubre": "oct",
-    "Noviembre": "nov",
-    "Diciembre": "dic",
+    "Enero": "ene.",
+    "Febrero": "feb.",
+    "Marzo": "mar.",
+    "Abril": "abr.",
+    "Mayo": "may.",
+    "Junio": "jun.",
+    "Julio": "jul.",
+    "Agosto": "ago.",
+    "Septiembre": "sept.",
+    "Octubre": "oct.",
+    "Noviembre": "nov.",
+    "Diciembre": "dic.",
 }
 
 
@@ -54,18 +54,18 @@ def convertir_fecha(fecha):
 def transform_date(date_str):
     # Dictionary mapping month numbers to three-letter abbreviations
     month_map = {
-        "01": "jan",
-        "02": "feb",
-        "03": "mar",
-        "04": "apr",
-        "05": "may",
-        "06": "jun",
-        "07": "jul",
-        "08": "aug",
-        "09": "sept",
-        "10": "oct",
-        "11": "nov",
-        "12": "dec",
+        "01": "jan.",
+        "02": "feb.",
+        "03": "mar.",
+        "04": "apr.",
+        "05": "may.",
+        "06": "jun.",
+        "07": "jul.",
+        "08": "aug.",
+        "09": "sept.",
+        "10": "oct.",
+        "11": "nov.",
+        "12": "dec.",
     }
 
     # Split the date string by '/'

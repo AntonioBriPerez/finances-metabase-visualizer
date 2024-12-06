@@ -119,7 +119,8 @@ class UNIR:
 
             return transform_date(f"{first_day}/{first_month}/{first_year}")
         else:
-            return self.source_path.stem
+            value = self.source_path.stem.split("-")
+            return f"{value[0]}.-{value[1]}"
 
     def export_to_json(self):
         import json
