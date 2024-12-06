@@ -86,15 +86,23 @@ class UNIR:
         return None
 
     def extraerSalarioNeto(self):
-        resultado = self.__find_on_texts(self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto)
+        resultado = self.__find_on_texts(
+            self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto
+        )
         if resultado is None:
-            resultado = self.__find_on_table_cells(self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto)
+            resultado = self.__find_on_table_cells(
+                self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto
+            )
         return resultado
 
     def extraerSalarioBruto(self):
-        resultado = self.__find_on_texts(self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto)
+        resultado = self.__find_on_texts(
+            self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto
+        )
         if resultado is None:
-            resultado = self.__find_on_table_cells(self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto)
+            resultado = self.__find_on_table_cells(
+                self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto
+            )
         return resultado
 
     def extraerMes(self):

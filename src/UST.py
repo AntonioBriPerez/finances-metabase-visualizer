@@ -45,7 +45,8 @@ class UST:
                 if isinstance(v, list) and len(v) > 0:
                     bbox = v[0]["bbox"]
                     match_count = sum(
-                        math.floor(bbox[dim]) == int(self.config["salario_neto_UST_bbox"][dim])
+                        math.floor(bbox[dim])
+                        == int(self.config["salario_neto_UST_bbox"][dim])
                         for dim in ["l", "t", "r", "b"]
                     )
                     if match_count >= 3:
@@ -56,11 +57,13 @@ class UST:
         for item in diccionario["data"]["table_cells"]:
             bbox = item.get("bbox", {})
             match_count = sum(
-                math.floor(bbox.get(dim, -1)) == int(self.config["salario_bruto_UST_bbox"][dim])
+                math.floor(bbox.get(dim, -1))
+                == int(self.config["salario_bruto_UST_bbox"][dim])
                 for dim in ["l", "t", "r", "b"]
             )
             if match_count >= 3:
                 return float(item["text"].replace(".", "").replace(",", "."))
+
     def extraerMes(self):
         import re
 

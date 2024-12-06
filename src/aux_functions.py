@@ -18,18 +18,20 @@ meses_abrev = {
     "Diciembre": "dic",
 }
 
+
 def generar_hash_archivo(ruta_archivo):
     # Crear un objeto hash SHA-256
     sha256_hash = hashlib.sha256()
-    
+
     # Abrir el archivo en modo binario
     with open(ruta_archivo, "rb") as archivo:
         # Leer y actualizar el hash por bloques de 4096 bytes
         for byte_block in iter(lambda: archivo.read(4096), b""):
             sha256_hash.update(byte_block)
-    
+
     # Devolver el hash en formato hexadecimal
     return sha256_hash.hexdigest()
+
 
 def convertir_fecha(fecha):
     # Dividir la cadena de fecha por espacio
