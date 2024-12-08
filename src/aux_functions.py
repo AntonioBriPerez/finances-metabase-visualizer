@@ -46,36 +46,38 @@ def convertir_fecha(fecha):
 
     if mes_abrev:
         # Retornar el formato deseado: "mes-año"
-        return f"{mes_abrev}-{año}"
+        return f"{año}-{obtener_mes_como_numero(mes)}-01"
     else:
         return "Mes no válido"
 
 
-def transform_date(date_str):
-    # Dictionary mapping month numbers to three-letter abbreviations
-    month_map = {
-        "01": "jan.",
-        "02": "feb.",
-        "03": "mar.",
-        "04": "apr.",
-        "05": "may.",
-        "06": "jun.",
-        "07": "jul.",
-        "08": "aug.",
-        "09": "sept.",
-        "10": "oct.",
-        "11": "nov.",
-        "12": "dec.",
+def obtener_mes_como_numero(mes):
+    # Diccionario para convertir el mes en español a su número correspondiente
+    meses_numeros = {
+        "Enero": "01",
+        "Febrero": "02",
+        "Marzo": "03",
+        "Abril": "04",
+        "Mayo": "05",
+        "Junio": "06",
+        "Julio": "07",
+        "Agosto": "08",
+        "Septiembre": "09",
+        "Octubre": "10",
+        "Noviembre": "11",
+        "Diciembre": "12",
     }
 
+    # Obtener el número del mes
+    return meses_numeros.get(mes, "Mes no válido")
+
+
+def transform_date(date_str):
     # Split the date string by '/'
     day, month, year = date_str.split("/")
 
-    # Get the abbreviated month
-    month_abbrev = month_map.get(month, month)
-
-    # Return in the desired format
-    return f"{month_abbrev}-{year}"
+    # Return in the format accepted by PostgreSQL: 'YYYY-MM-DD'
+    return f"{year}-{month}-{day}"
 
 
 def list_files_recursive(
