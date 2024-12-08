@@ -4,7 +4,6 @@ import imaplib
 import os
 import time
 import logging
-import shutil
 from src.aux_functions import generar_hash_archivo
 from src.Database import Database
 from dotenv import load_dotenv
