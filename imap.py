@@ -2,6 +2,7 @@ import email
 from email.header import decode_header
 import imaplib
 import os
+import shutil
 import logging
 from src.aux_functions import generar_hash_archivo
 from src.Database import Database
@@ -65,7 +66,7 @@ def download_payroll_attachments(email_message, download_path=None, db=None):
 
 
 def get_icloud_emails(
-    username, password, download_path=None, db=None, reprocess_all=False
+    username, password, download_path=None, db=None
 ):
     IMAP_SERVER = os.getenv("IMAP_HOST_ICLOUD")
 
@@ -88,7 +89,7 @@ def get_icloud_emails(
             email_message = email.message_from_bytes(raw_email)
 
             attachments = download_payroll_attachments(
-                email_message, download_path, db, reprocess_all
+                email_message, download_path, db
             )
 
             if attachments:
@@ -118,17 +119,21 @@ def main():
     )
 
     logging.info("Checking for new payroll emails")
-    nominas_path = get_icloud_emails(
-        USERNAME,
-        PASSWORD,
-        download_path=DOWNLOAD_PATH,
-        db=db,
-    )
-    for p in nominas_path:
-        df = parse_nomina(p)
-        db.insert_dataframe(df, "nominas", if_exists="append", index=False)
-        logging.info(f"Parsed payroll file: {p}")
-
+    try:
+        nominas_path = get_icloud_emails(
+            USERNAME,
+            PASSWORD,
+            download_path=DOWNLOAD_PATH,
+            db=db,
+        )
+        for p in nominas_path:
+            df = parse_nomina(p)
+            db.insert_dataframe(df, "nominas", if_exists="append", index=False)
+            logging.info(f"Parsed payroll file: {p}")
+    except Exception as e:
+        logging.error(f"An unknown error occurred: {e}")
+    finally:
+        shutil.rmtree(DOWNLOAD_PATH) # Eliminar los archivos descargados
 
 if __name__ == "__main__":
     main()

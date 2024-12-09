@@ -47,9 +47,9 @@ class UST:
 
     def __prechecks(self, file):
         file_name = file.name
-        assert file_name.endswith(".pdf"), "El archivo no es un PDF"
-        assert len(file_name.split("-")) == 3, "El archivo no tiene el formato correcto"
-        assert file_name.split("-")[0] == "ust", "El archivo no es de UST"
+        assert file_name.endswith(".pdf"), f"El archivo {file_name} no es un PDF"
+        assert len(file_name.split("-")) == 3, f"El archivo {file_name} no tiene el formato correcto"
+        assert file_name.split("-")[0] == "ust", f"El archivo{file_name}  no es de UST"
         assert (
             file_name.split("-")[1].capitalize() in UST.meses_numeros.keys()
         ), "El mes no es válido"

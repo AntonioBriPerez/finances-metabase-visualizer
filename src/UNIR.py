@@ -58,9 +58,10 @@ class UNIR:
 
     def __prechecks(self, file):
         file_name = file.name
-        assert file_name.endswith(".pdf"), "El archivo no es un PDF"
-        assert len(file_name.split("-")) == 3, "El archivo no tiene el formato correcto"
-        assert file_name.split("-")[0] == "unir", "El archivo no es de UNIR"
+        
+        assert file_name.endswith(".pdf"), f"El archivo {file_name} no es un PDF"
+        assert len(file_name.split("-")) == 3, f"El archivo {file_name} no tiene el formato correcto"
+        assert file_name.split("-")[0] == "unir", f"El archivo {file_name} no es de UNIR"
         assert (
             file_name.split("-")[1] in UNIR.meses_numeros.keys()
         ), "El mes no es válido"
