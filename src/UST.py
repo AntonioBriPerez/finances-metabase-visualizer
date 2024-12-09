@@ -48,7 +48,7 @@ class UST:
         file_name = file.name
         assert file_name.endswith(".pdf"), "El archivo no es un PDF"
         assert len(file_name.split('-')) == 3, "El archivo no tiene el formato correcto"
-        assert file_name.split('-')[0] == "unir", "El archivo no es de UNIR"
+        assert file_name.split('-')[0] == "ust", "El archivo no es de UST"
         assert file_name.split('-')[1].capitalize() in UST.meses_numeros.keys(), "El mes no es válido"
         assert file_name.split('-')[2].replace('.pdf','').isdigit(), "El año no es válido"
 
