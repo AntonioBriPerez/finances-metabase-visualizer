@@ -4,10 +4,12 @@ import imaplib
 import os
 import shutil
 import logging
-from src.aux_functions import generar_hash_archivo
-from src.Database import Database
+
 from dotenv import load_dotenv
 from doclingparser import parse_nomina
+
+from src.aux_functions import generar_hash_archivo
+from src.Database import Database
 
 # Configuración del logger
 logging.basicConfig(
@@ -22,6 +24,7 @@ def download_payroll_attachments(email_message, download_path=None, db=None):
     os.makedirs(download_path, exist_ok=True)
 
     downloaded_attachments = []
+    existing_hashes = set(db.get_existing_hashes("nominas"))
 
     for part in email_message.walk():
         if part.get_content_maintype() == "multipart":
@@ -48,20 +51,16 @@ def download_payroll_attachments(email_message, download_path=None, db=None):
 
                 file_hash = generar_hash_archivo(filepath)
                 if db:
-                    existing_hashes = db.get_existing_hashes("nominas")
                     if file_hash in existing_hashes:
                         logging.info(f"Skipping already processed file: {filename}")
                         os.remove(filepath)
                         continue
 
-                with open(filepath, "wb") as f:
-                    f.write(part.get_payload(decode=True))
                 downloaded_attachments.append(filepath)
                 logging.info(f"Downloaded payroll attachment: {filename}")
 
             except Exception as e:
                 logging.error(f"Error downloading attachment: {e}")
-
     return downloaded_attachments
 
 
@@ -127,7 +126,11 @@ def main():
             db=db,
         )
         for p in nominas_path:
-            df = parse_nomina(p)
+            try:
+                df = parse_nomina(p)
+            except Exception as e:
+                logging.error(f"Error parsing payroll file: {e}. Continuing with next file")
+                continue
             db.insert_dataframe(df, "nominas", if_exists="append", index=False)
             logging.info(f"Parsed payroll file: {p}")
     except Exception as e:

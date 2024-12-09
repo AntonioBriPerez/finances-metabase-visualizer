@@ -58,16 +58,18 @@ class UNIR:
 
     def __prechecks(self, file):
         file_name = file.name
-        
-        assert file_name.endswith(".pdf"), f"El archivo {file_name} no es un PDF"
-        assert len(file_name.split("-")) == 3, f"El archivo {file_name} no tiene el formato correcto"
-        assert file_name.split("-")[0] == "unir", f"El archivo {file_name} no es de UNIR"
-        assert (
-            file_name.split("-")[1] in UNIR.meses_numeros.keys()
-        ), "El mes no es válido"
-        assert (
-            file_name.split("-")[2].replace(".pdf", "").isdigit()
-        ), "El año no es válido"
+        try:
+            assert file_name.endswith(".pdf"), f"El archivo {file_name} no es un PDF"
+            assert len(file_name.split("-")) == 3, f"El archivo {file_name} no tiene el formato correcto"
+            assert file_name.split("-")[0] == "unir", f"El archivo {file_name} no es de UNIR"
+            assert (
+                file_name.split("-")[1] in UNIR.meses_numeros.keys()
+            ), "El mes no es válido"
+            assert (
+                file_name.split("-")[2].replace(".pdf", "").isdigit()
+            ), "El año no es válido"
+        except AssertionError as e:
+            raise AssertionError(e)
 
     @property
     def salario_neto(self: float) -> float:
