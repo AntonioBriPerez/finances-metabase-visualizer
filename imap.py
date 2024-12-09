@@ -68,7 +68,7 @@ def download_payroll_attachments(
 
 
 def get_icloud_emails(
-    username, password, num_emails=5, download_path=None, db=None, reprocess_all=False
+    username, password, download_path=None, db=None, reprocess_all=False
 ):
     IMAP_SERVER = os.getenv("IMAP_HOST_ICLOUD")
 
@@ -122,21 +122,19 @@ def main():
         user=os.getenv("PG_USER"),
         password=os.getenv("PG_PASS"),
     )
-    while True:
 
-        logging.info("Checking for new payroll emails")
-        nominas_path = get_icloud_emails(
-            USERNAME,
-            PASSWORD,
-            download_path=DOWNLOAD_PATH,
-            db=db,
-            reprocess_all=reprocess_all,
-        )
-        for p in nominas_path:
-            df = parse_nomina(p)
-            db.insert_dataframe(df, "nominas", if_exists="append", index=False)
-            logging.info(f"Parsed payroll file: {p}")
-        time.sleep(int(os.getenv("SLEEP_TIME")))
+    logging.info("Checking for new payroll emails")
+    nominas_path = get_icloud_emails(
+        USERNAME,
+        PASSWORD,
+        download_path=DOWNLOAD_PATH,
+        db=db,
+        reprocess_all=reprocess_all,
+    )
+    for p in nominas_path:
+        df = parse_nomina(p)
+        db.insert_dataframe(df, "nominas", if_exists="append", index=False)
+        logging.info(f"Parsed payroll file: {p}")
 
 
 if __name__ == "__main__":

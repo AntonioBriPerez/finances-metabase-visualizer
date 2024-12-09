@@ -1,5 +1,3 @@
-import pandas as pd
-from .aux_functions import transform_date
 from pathlib import Path
 from docling.document_converter import DocumentConverter
 from docling.datamodel.base_models import InputFormat
@@ -10,7 +8,27 @@ import math
 
 
 class UNIR:
+    meses_numeros = {
+        "enero": "01",
+        "febrero": "02",
+        "marzo": "03",
+        "abril": "04",
+        "mayo": "05",
+        "junio": "06",
+        "julio": "07",
+        "agosto": "08",
+        "septiembre": "09",
+        "octubre": "10",
+        "noviembre": "11",
+        "diciembre": "12",
+    }
     def __init__(self, file: str, config_file: str):
+        '''
+        file: EL NOMBRE DEBE SER "unir-<mes>-<año>.pdf"
+        por ejemplo   "unir-enero-2021.pdf" el mes y empresa en minusculas
+        '''
+        self.__prechecks(Path(file))
+
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
         self.__l_neto = int(self.config["salario_neto_UNIR_bbox"]["l"])
@@ -36,6 +54,14 @@ class UNIR:
         )
         result = converter.convert(self.source_path)
         self.data = result.document.export_to_dict()
+
+    def __prechecks(self, file):
+        file_name = file.name
+        assert file_name.endswith(".pdf"), "El archivo no es un PDF"
+        assert len(file_name.split('-')) == 3, "El archivo no tiene el formato correcto"
+        assert file_name.split('-')[0] == "unir", "El archivo no es de UNIR"
+        assert file_name.split('-')[1] in UNIR.meses_numeros.keys(), "El mes no es válido"
+        assert file_name.split('-')[2].replace('.pdf','').isdigit(), "El año no es válido"
 
     @property
     def salario_neto(self: float) -> float:
@@ -104,6 +130,7 @@ class UNIR:
                 self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto
             )
         return resultado
+        
 
     def extraerMes(self):
         import re
@@ -117,10 +144,10 @@ class UNIR:
             first_month = found.group(2)
             first_year = found.group(3)
 
-            return transform_date(f"{first_day}/{first_month}/{first_year}")
+            return f"{first_day}-{first_month}-{first_year}"
         else:
             value = self.source_path.stem.split("-")
-            return f"{value[0]}.-{value[1]}"
+            return f"01-{UNIR.meses_numeros.get(value[1])}-{value[2]}"
 
     def export_to_json(self):
         import json

@@ -2,21 +2,6 @@ from pathlib import Path
 from typing import List
 import hashlib
 
-# Diccionario para convertir el mes en español a su abreviatura
-meses_abrev = {
-    "Enero": "ene.",
-    "Febrero": "feb.",
-    "Marzo": "mar.",
-    "Abril": "abr.",
-    "Mayo": "may.",
-    "Junio": "jun.",
-    "Julio": "jul.",
-    "Agosto": "ago.",
-    "Septiembre": "sept.",
-    "Octubre": "oct.",
-    "Noviembre": "nov.",
-    "Diciembre": "dic.",
-}
 
 
 def generar_hash_archivo(ruta_archivo):
@@ -31,53 +16,6 @@ def generar_hash_archivo(ruta_archivo):
 
     # Devolver el hash en formato hexadecimal
     return sha256_hash.hexdigest()
-
-
-def convertir_fecha(fecha):
-    # Dividir la cadena de fecha por espacio
-    partes = fecha.split()
-
-    # El mes es la segunda parte (índice 1) y el año es la tercera parte (índice 2)
-    mes = partes[1]
-    año = partes[2]
-
-    # Convertir el mes a su abreviatura
-    mes_abrev = meses_abrev.get(mes)
-
-    if mes_abrev:
-        # Retornar el formato deseado: "mes-año"
-        return f"{año}-{obtener_mes_como_numero(mes)}-01"
-    else:
-        return "Mes no válido"
-
-
-def obtener_mes_como_numero(mes):
-    # Diccionario para convertir el mes en español a su número correspondiente
-    meses_numeros = {
-        "Enero": "01",
-        "Febrero": "02",
-        "Marzo": "03",
-        "Abril": "04",
-        "Mayo": "05",
-        "Junio": "06",
-        "Julio": "07",
-        "Agosto": "08",
-        "Septiembre": "09",
-        "Octubre": "10",
-        "Noviembre": "11",
-        "Diciembre": "12",
-    }
-
-    # Obtener el número del mes
-    return meses_numeros.get(mes, "Mes no válido")
-
-
-def transform_date(date_str):
-    # Split the date string by '/'
-    day, month, year = date_str.split("/")
-
-    # Return in the format accepted by PostgreSQL: 'YYYY-MM-DD'
-    return f"{year}-{month}-{day}"
 
 
 def list_files_recursive(
