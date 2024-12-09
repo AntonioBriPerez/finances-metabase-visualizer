@@ -22,11 +22,12 @@ class UNIR:
         "noviembre": "11",
         "diciembre": "12",
     }
+
     def __init__(self, file: str, config_file: str):
-        '''
+        """
         file: EL NOMBRE DEBE SER "unir-<mes>-<año>.pdf"
         por ejemplo   "unir-enero-2021.pdf" el mes y empresa en minusculas
-        '''
+        """
         self.__prechecks(Path(file))
 
         self.config = configparser.ConfigParser()
@@ -58,10 +59,14 @@ class UNIR:
     def __prechecks(self, file):
         file_name = file.name
         assert file_name.endswith(".pdf"), "El archivo no es un PDF"
-        assert len(file_name.split('-')) == 3, "El archivo no tiene el formato correcto"
-        assert file_name.split('-')[0] == "unir", "El archivo no es de UNIR"
-        assert file_name.split('-')[1] in UNIR.meses_numeros.keys(), "El mes no es válido"
-        assert file_name.split('-')[2].replace('.pdf','').isdigit(), "El año no es válido"
+        assert len(file_name.split("-")) == 3, "El archivo no tiene el formato correcto"
+        assert file_name.split("-")[0] == "unir", "El archivo no es de UNIR"
+        assert (
+            file_name.split("-")[1] in UNIR.meses_numeros.keys()
+        ), "El mes no es válido"
+        assert (
+            file_name.split("-")[2].replace(".pdf", "").isdigit()
+        ), "El año no es válido"
 
     @property
     def salario_neto(self: float) -> float:
@@ -130,7 +135,6 @@ class UNIR:
                 self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto
             )
         return resultado
-        
 
     def extraerMes(self):
         import re

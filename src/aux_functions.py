@@ -3,7 +3,6 @@ from typing import List
 import hashlib
 
 
-
 def generar_hash_archivo(ruta_archivo):
     # Crear un objeto hash SHA-256
     sha256_hash = hashlib.sha256()

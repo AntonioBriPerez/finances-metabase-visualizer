@@ -24,10 +24,10 @@ class UST:
     }
 
     def __init__(self, file: str, config_file: str):
-        '''
+        """
         file: EL NOMBRE DEBE SER "ust-<mes>-<año>.pdf"
         por ejemplo   "ust-enero-2021.pdf" el mes y empresa en minusculas
-        '''
+        """
         self.__prechecks(Path(file))
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
@@ -44,13 +44,18 @@ class UST:
         )
         result = converter.convert(self.source_path)
         self.data = result.document.export_to_dict()
+
     def __prechecks(self, file):
         file_name = file.name
         assert file_name.endswith(".pdf"), "El archivo no es un PDF"
-        assert len(file_name.split('-')) == 3, "El archivo no tiene el formato correcto"
-        assert file_name.split('-')[0] == "ust", "El archivo no es de UST"
-        assert file_name.split('-')[1].capitalize() in UST.meses_numeros.keys(), "El mes no es válido"
-        assert file_name.split('-')[2].replace('.pdf','').isdigit(), "El año no es válido"
+        assert len(file_name.split("-")) == 3, "El archivo no tiene el formato correcto"
+        assert file_name.split("-")[0] == "ust", "El archivo no es de UST"
+        assert (
+            file_name.split("-")[1].capitalize() in UST.meses_numeros.keys()
+        ), "El mes no es válido"
+        assert (
+            file_name.split("-")[2].replace(".pdf", "").isdigit()
+        ), "El año no es válido"
 
     @property
     def salario_neto(self: float) -> float:

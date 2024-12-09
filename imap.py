@@ -2,7 +2,6 @@ import email
 from email.header import decode_header
 import imaplib
 import os
-import time
 import logging
 from src.aux_functions import generar_hash_archivo
 from src.Database import Database
@@ -15,9 +14,7 @@ logging.basicConfig(
 )
 
 
-def download_payroll_attachments(
-    email_message, download_path=None, db=None, reprocess_all=False
-):
+def download_payroll_attachments(email_message, download_path=None, db=None):
     if download_path is None:
         download_path = os.getcwd()
 
@@ -49,7 +46,7 @@ def download_payroll_attachments(
                     f.write(part.get_payload(decode=True))
 
                 file_hash = generar_hash_archivo(filepath)
-                if db and not reprocess_all:
+                if db:
                     existing_hashes = db.get_existing_hashes("nominas")
                     if file_hash in existing_hashes:
                         logging.info(f"Skipping already processed file: {filename}")
@@ -112,9 +109,6 @@ def main():
     PASSWORD = os.getenv("IMAP_PASS_ICLOUD")
     DOWNLOAD_PATH = os.path.join(os.getcwd(), "payroll_attachments")
 
-    import sys
-
-    reprocess_all = "--reprocess" in sys.argv
     db = Database(
         host=os.getenv("PG_HOST"),
         port=os.getenv("PG_PORT"),
@@ -129,7 +123,6 @@ def main():
         PASSWORD,
         download_path=DOWNLOAD_PATH,
         db=db,
-        reprocess_all=reprocess_all,
     )
     for p in nominas_path:
         df = parse_nomina(p)
