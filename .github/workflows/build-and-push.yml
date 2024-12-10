@@ -52,4 +52,5 @@ jobs:
 
       # 6. Output the pushed image information
       - name: Image Info
-        run: echo "Docker image pushed: antoniobriperez/payroll-analyzer:${{ steps.tag.outputs.TAG }}"
+        run: |
+          echo "Docker image pushed: antoniobriperez/payroll-analyzer:${{ steps.tag.outputs.TAG }}"
