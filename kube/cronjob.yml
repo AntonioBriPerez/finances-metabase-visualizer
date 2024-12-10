@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: payroll-analyzer-cronjob
+  namespace: finances
+spec:
+  schedule: "*/1 * * * *"  # Runs every minute
+  concurrencyPolicy: Forbid  # Prevents concurrent runs
+  startingDeadlineSeconds: 30  # Time within which the job should start
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: payroll-analyzer
+              image: antoniobriperez/payroll-analyzer:v0.0.1  # Replace 'tagname' appropriately
+              imagePullPolicy: IfNotPresent
+              envFrom:
+                - configMapRef:
+                    name: finances-app-config
+                - secretRef:
+                    name: finances-app-secrets
+              # If your application requires command overrides, specify them here
+              # command: ["python", "main.py"]
+          restartPolicy: OnFailure  # Restart policy for failed jobs

@@ -60,6 +60,7 @@ def download_payroll_attachments(email_message, download_path=None, db=None):
 
             except Exception as e:
                 logging.error(f"Error downloading attachment: {e}")
+                raise e
     return downloaded_attachments
 
 
@@ -100,6 +101,7 @@ def get_icloud_emails(
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
+        raise e
 
 
 def main():
@@ -127,12 +129,13 @@ def main():
             try:
                 df = parse_nomina(p)
             except Exception as e:
-                logging.error(f"Error parsing payroll file: {e}. Continuing with next file")
+                logging.warning(f"Error parsing payroll file: {e}. Continuing with next file")
                 continue
             db.insert_dataframe(df, "nominas", if_exists="append", index=False)
             logging.info(f"Parsed payroll file: {p}")
     except Exception as e:
         logging.error(f"An unknown error occurred: {e}")
+        raise e
     finally:
         if os.path.exists(DOWNLOAD_PATH): shutil.rmtree(DOWNLOAD_PATH) # Eliminar los archivos descargados
 
