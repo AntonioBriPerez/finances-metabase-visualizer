@@ -1,5 +1,3 @@
-import pandas as pd
-from .aux_functions import transform_date, convertir_fecha
 from pathlib import Path
 from docling.document_converter import DocumentConverter
 from docling.datamodel.base_models import InputFormat
@@ -10,7 +8,27 @@ import configparser
 
 
 class UST:
+    meses_numeros = {
+        "Enero": "01",
+        "Febrero": "02",
+        "Marzo": "03",
+        "Abril": "04",
+        "Mayo": "05",
+        "Junio": "06",
+        "Julio": "07",
+        "Agosto": "08",
+        "Septiembre": "09",
+        "Octubre": "10",
+        "Noviembre": "11",
+        "Diciembre": "12",
+    }
+
     def __init__(self, file: str, config_file: str):
+        """
+        file: EL NOMBRE DEBE SER "ust-<mes>-<año>.pdf"
+        por ejemplo   "ust-enero-2021.pdf" el mes y empresa en minusculas
+        """
+        self.__prechecks(Path(file))
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
         self.source_path = Path(file)
@@ -26,6 +44,21 @@ class UST:
         )
         result = converter.convert(self.source_path)
         self.data = result.document.export_to_dict()
+
+    def __prechecks(self, file):
+        file_name = file.name
+        try:
+            assert file_name.endswith(".pdf"), f"El archivo {file_name} no es un PDF"
+            assert len(file_name.split("-")) == 3, f"El archivo {file_name} no tiene el formato correcto"
+            assert file_name.split("-")[0] == "ust", f"El archivo{file_name}  no es de UST"
+            assert (
+                file_name.split("-")[1].capitalize() in UST.meses_numeros.keys()
+            ), "El mes no es válido"
+            assert (
+                file_name.split("-")[2].replace(".pdf", "").isdigit()
+            ), "El año no es válido"
+        except AssertionError as e:
+            raise AssertionError(e)
 
     @property
     def salario_neto(self: float) -> float:
@@ -79,7 +112,19 @@ class UST:
             mes_fin = coincidencia.group(5)
             año_fin = coincidencia.group(6)
             # Imprimir el resultado
-            return convertir_fecha(f"{dia_fin} {mes_fin} {año_fin}")
+            return self.__convertir_fecha(f"{dia_fin} {mes_fin} {año_fin}")
+
+    @staticmethod
+    def __convertir_fecha(fecha):
+        # Dividir la cadena de fecha por espacio
+        partes = fecha.split()
+
+        # El mes es la segunda parte (índice 1) y el año es la tercera parte (índice 2)
+        mes = partes[1]
+        año = partes[2]
+
+        # Convertir el mes a su abreviatura
+        return f"{año}-{UST.meses_numeros.get(mes, "Mes no valido")}-01"
 
     def convert_to_pd():
         pass

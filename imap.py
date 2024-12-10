@@ -2,12 +2,13 @@ import email
 from email.header import decode_header
 import imaplib
 import os
-import time
+import shutil
 import logging
+
+from src.doclingparser import parse_nomina
+
 from src.aux_functions import generar_hash_archivo
 from src.Database import Database
-from dotenv import load_dotenv
-from doclingparser import parse_nomina
 
 # Configuración del logger
 logging.basicConfig(
@@ -15,15 +16,14 @@ logging.basicConfig(
 )
 
 
-def download_payroll_attachments(
-    email_message, download_path=None, db=None, reprocess_all=False
-):
+def download_payroll_attachments(email_message, download_path=None, db=None):
     if download_path is None:
         download_path = os.getcwd()
 
     os.makedirs(download_path, exist_ok=True)
 
     downloaded_attachments = []
+    existing_hashes = set(db.get_existing_hashes("nominas"))
 
     for part in email_message.walk():
         if part.get_content_maintype() == "multipart":
@@ -49,26 +49,22 @@ def download_payroll_attachments(
                     f.write(part.get_payload(decode=True))
 
                 file_hash = generar_hash_archivo(filepath)
-                if db and not reprocess_all:
-                    existing_hashes = db.get_existing_hashes("nominas")
+                if db:
                     if file_hash in existing_hashes:
                         logging.info(f"Skipping already processed file: {filename}")
                         os.remove(filepath)
                         continue
 
-                with open(filepath, "wb") as f:
-                    f.write(part.get_payload(decode=True))
                 downloaded_attachments.append(filepath)
                 logging.info(f"Downloaded payroll attachment: {filename}")
 
             except Exception as e:
                 logging.error(f"Error downloading attachment: {e}")
-
     return downloaded_attachments
 
 
 def get_icloud_emails(
-    username, password, num_emails=5, download_path=None, db=None, reprocess_all=False
+    username, password, download_path=None, db=None
 ):
     IMAP_SERVER = os.getenv("IMAP_HOST_ICLOUD")
 
@@ -80,7 +76,7 @@ def get_icloud_emails(
 
         _, search_data = mail.search(None, "ALL")
         email_ids = search_data[0].split()
-
+        
         email_ids = email_ids[::-1]
 
         for email_id in email_ids:
@@ -91,7 +87,7 @@ def get_icloud_emails(
             email_message = email.message_from_bytes(raw_email)
 
             attachments = download_payroll_attachments(
-                email_message, download_path, db, reprocess_all
+                email_message, download_path, db
             )
 
             if attachments:
@@ -107,14 +103,10 @@ def get_icloud_emails(
 
 
 def main():
-    load_dotenv()
     USERNAME = os.getenv("IMAP_USER_ICLOUD")
     PASSWORD = os.getenv("IMAP_PASS_ICLOUD")
     DOWNLOAD_PATH = os.path.join(os.getcwd(), "payroll_attachments")
 
-    import sys
-
-    reprocess_all = "--reprocess" in sys.argv
     db = Database(
         host=os.getenv("PG_HOST"),
         port=os.getenv("PG_PORT"),
@@ -122,22 +114,27 @@ def main():
         user=os.getenv("PG_USER"),
         password=os.getenv("PG_PASS"),
     )
-    while True:
 
-        logging.info("Checking for new payroll emails")
+    logging.info("Checking for new payroll emails")
+    try:
         nominas_path = get_icloud_emails(
             USERNAME,
             PASSWORD,
             download_path=DOWNLOAD_PATH,
             db=db,
-            reprocess_all=reprocess_all,
         )
         for p in nominas_path:
-            df = parse_nomina(p)
+            try:
+                df = parse_nomina(p)
+            except Exception as e:
+                logging.error(f"Error parsing payroll file: {e}. Continuing with next file")
+                continue
             db.insert_dataframe(df, "nominas", if_exists="append", index=False)
             logging.info(f"Parsed payroll file: {p}")
-        time.sleep(int(os.getenv("SLEEP_TIME")))
-
+    except Exception as e:
+        logging.error(f"An unknown error occurred: {e}")
+    finally:
+        if os.path.exists(DOWNLOAD_PATH): shutil.rmtree(DOWNLOAD_PATH) # Eliminar los archivos descargados
 
 if __name__ == "__main__":
     main()
