@@ -77,7 +77,7 @@ def get_icloud_emails(
 
         _, search_data = mail.search(None, "ALL")
         email_ids = search_data[0].split()
-
+        
         email_ids = email_ids[::-1]
 
         for email_id in email_ids:
@@ -136,7 +136,7 @@ def main():
     except Exception as e:
         logging.error(f"An unknown error occurred: {e}")
     finally:
-        shutil.rmtree(DOWNLOAD_PATH) # Eliminar los archivos descargados
+        if os.path.exists(DOWNLOAD_PATH): shutil.rmtree(DOWNLOAD_PATH) # Eliminar los archivos descargados
 
 if __name__ == "__main__":
     main()
