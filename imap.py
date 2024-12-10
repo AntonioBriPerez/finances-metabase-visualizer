@@ -5,8 +5,7 @@ import os
 import shutil
 import logging
 
-from dotenv import load_dotenv
-from doclingparser import parse_nomina
+from src.doclingparser import parse_nomina
 
 from src.aux_functions import generar_hash_archivo
 from src.Database import Database
@@ -104,7 +103,6 @@ def get_icloud_emails(
 
 
 def main():
-    load_dotenv()
     USERNAME = os.getenv("IMAP_USER_ICLOUD")
     PASSWORD = os.getenv("IMAP_PASS_ICLOUD")
     DOWNLOAD_PATH = os.path.join(os.getcwd(), "payroll_attachments")

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: finances-app-config
+  namespace: finances
+data:
+  IMAP_HOST_ICLOUD: 'imap.mail.me.com'
+  PG_HOST: '192.168.18.240'
+  PG_PORT: '5432'
+  PG_USER: 'root'
+  PG_DBNAME: 'finanzas_db'
+  SLEEP_TIME: '10'  # Changed from 10 to '10'
