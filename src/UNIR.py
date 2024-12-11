@@ -5,6 +5,8 @@ from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode
 import configparser
 import math
+import os
+os.environ["TQDM_DISABLE"] = "1"
 
 
 class UNIR:
