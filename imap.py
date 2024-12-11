@@ -132,8 +132,10 @@ def main():
                 
                 df = parse_nomina(p)
             except Exception as e:
+
                 logging.warning(f"Error parsing payroll file: {p}. Continuing with next file")
                 logging.warning(f"Error: {e}")
+
                 continue
             db.insert_dataframe(df, "nominas", if_exists="append", index=False)
             logging.info(f"Parsed payroll file: {p}")
