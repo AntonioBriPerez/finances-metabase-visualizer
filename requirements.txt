@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 docling==2.8.3
 SQLAlchemy==2.0.36
 psycopg2-binary==2.9.10

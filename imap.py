@@ -4,6 +4,7 @@ import imaplib
 import os
 import shutil
 import logging
+from functools import partialmethod
 
 from src.doclingparser import parse_nomina
 
@@ -14,6 +15,7 @@ from src.Database import Database
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
+os.environ["HAYSTACK_PROGRESS_BARS"] = "0"
 
 
 def download_payroll_attachments(email_message, download_path=None, db=None):
@@ -127,9 +129,13 @@ def main():
         )
         for p in nominas_path:
             try:
+                
                 df = parse_nomina(p)
             except Exception as e:
-                logging.warning(f"Error parsing payroll file: {e}. Continuing with next file")
+
+                logging.warning(f"Error parsing payroll file: {p}. Continuing with next file")
+                logging.warning(f"Error: {e}")
+
                 continue
             db.insert_dataframe(df, "nominas", if_exists="append", index=False)
             logging.info(f"Parsed payroll file: {p}")
