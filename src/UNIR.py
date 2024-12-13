@@ -5,8 +5,6 @@ from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode
 import configparser
 import math
-import os
-os.environ["TQDM_DISABLE"] = "1"
 
 
 class UNIR:
@@ -62,8 +60,12 @@ class UNIR:
         file_name = file.name
         try:
             assert file_name.endswith(".pdf"), f"El archivo {file_name} no es un PDF"
-            assert len(file_name.split("-")) == 3, f"El archivo {file_name} no tiene el formato correcto"
-            assert file_name.split("-")[0] == "unir", f"El archivo {file_name} no es de UNIR"
+            assert (
+                len(file_name.split("-")) == 3
+            ), f"El archivo {file_name} no tiene el formato correcto"
+            assert (
+                file_name.split("-")[0] == "unir"
+            ), f"El archivo {file_name} no es de UNIR"
             assert (
                 file_name.split("-")[1] in UNIR.meses_numeros.keys()
             ), "El mes no es válido"

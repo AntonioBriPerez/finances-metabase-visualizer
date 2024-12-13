@@ -4,7 +4,6 @@ import imaplib
 import os
 import shutil
 import logging
-from functools import partialmethod
 
 from src.doclingparser import parse_nomina
 
@@ -15,7 +14,6 @@ from src.Database import Database
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-os.environ["HAYSTACK_PROGRESS_BARS"] = "0"
 
 
 def download_payroll_attachments(email_message, download_path=None, db=None):
@@ -66,9 +64,7 @@ def download_payroll_attachments(email_message, download_path=None, db=None):
     return downloaded_attachments
 
 
-def get_icloud_emails(
-    username, password, download_path=None, db=None
-):
+def get_icloud_emails(username, password, download_path=None, db=None):
     IMAP_SERVER = os.getenv("IMAP_HOST_ICLOUD")
 
     try:
@@ -79,7 +75,7 @@ def get_icloud_emails(
 
         _, search_data = mail.search(None, "ALL")
         email_ids = search_data[0].split()
-        
+
         email_ids = email_ids[::-1]
 
         for email_id in email_ids:
@@ -89,9 +85,7 @@ def get_icloud_emails(
             raw_email = email_data[0][1]
             email_message = email.message_from_bytes(raw_email)
 
-            attachments = download_payroll_attachments(
-                email_message, download_path, db
-            )
+            attachments = download_payroll_attachments(email_message, download_path, db)
 
             if attachments:
                 break
@@ -110,7 +104,8 @@ def main():
     USERNAME = os.getenv("IMAP_USER_ICLOUD")
     PASSWORD = os.getenv("IMAP_PASS_ICLOUD")
     DOWNLOAD_PATH = os.path.join(os.getcwd(), "payroll_attachments")
-
+    os.environ["HAYSTACK_PROGRESS_BARS"] = "0"
+    os.environ["TQDM_MININTERVAL"] = "1"
     db = Database(
         host=os.getenv("PG_HOST"),
         port=os.getenv("PG_PORT"),
@@ -129,11 +124,13 @@ def main():
         )
         for p in nominas_path:
             try:
-                
+
                 df = parse_nomina(p)
             except Exception as e:
 
-                logging.warning(f"Error parsing payroll file: {p}. Continuing with next file")
+                logging.warning(
+                    f"Error parsing payroll file: {p}. Continuing with next file"
+                )
                 logging.warning(f"Error: {e}")
 
                 continue
@@ -143,7 +140,9 @@ def main():
         logging.error(f"An unknown error occurred: {e}")
         raise e
     finally:
-        if os.path.exists(DOWNLOAD_PATH): shutil.rmtree(DOWNLOAD_PATH) # Eliminar los archivos descargados
+        if os.path.exists(DOWNLOAD_PATH):
+            shutil.rmtree(DOWNLOAD_PATH)  # Eliminar los archivos descargados
+
 
 if __name__ == "__main__":
     main()

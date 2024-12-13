@@ -21,7 +21,6 @@ def parse_nomina(nomina_path: str) -> pd.DataFrame:
             index=[0],
         )
 
-
     elif "ust" in nomina_path.lower():
         nomina_ust = UST(nomina_path, config_file="config.ini")
         return pd.DataFrame(
@@ -36,4 +35,3 @@ def parse_nomina(nomina_path: str) -> pd.DataFrame:
             index=[0],
         )
     os.remove(nomina_path)
- 
