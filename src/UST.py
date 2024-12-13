@@ -8,7 +8,6 @@ import configparser
 import os
 os.environ["TQDM_DISABLE"] = "1"
 
-
 class UST:
     meses_numeros = {
         "Enero": "01",
