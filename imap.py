@@ -104,8 +104,7 @@ def main():
     USERNAME = os.getenv("IMAP_USER_ICLOUD")
     PASSWORD = os.getenv("IMAP_PASS_ICLOUD")
     DOWNLOAD_PATH = os.path.join(os.getcwd(), "payroll_attachments")
-    os.environ["HAYSTACK_PROGRESS_BARS"] = "0"
-    os.environ["TQDM_MININTERVAL"] = "1"
+
     db = Database(
         host=os.getenv("PG_HOST"),
         port=os.getenv("PG_PORT"),
