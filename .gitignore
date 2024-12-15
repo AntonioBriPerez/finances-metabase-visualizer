@@ -7,5 +7,6 @@
 *.txt
 __pycache__/
 !requirements.txt
+!assets/sample.pdf
 **secret**
 pruebadocling.py
