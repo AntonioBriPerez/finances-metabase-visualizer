@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
             - name: payroll-analyzer
-              image: antoniobriperez/payroll-analyzer:v0.0.6  # Replace 'tagname' appropriately
+              image: antoniobriperez/payroll-analyzer:v0.0.7  # Replace 'tagname' appropriately
               imagePullPolicy: IfNotPresent
               envFrom:
                 - configMapRef:
