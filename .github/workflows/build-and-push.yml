@@ -1,7 +1,10 @@
 name: Build and Push Docker Image
 
-# Manual trigger with optional input for tag name
+# Trigger on push to main branch or manual dispatch
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       tag:
@@ -17,6 +20,8 @@ jobs:
       # 1. Checkout the repository code
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure full history for tag detection
 
       # 2. Set up Docker Buildx
       - name: Set up Docker Buildx
@@ -33,14 +38,22 @@ jobs:
       - name: Determine Docker image tag
         id: tag
         run: |
+          # Check if a manual tag was provided
           if [ "${{ github.event.inputs.tag }}" != "" ]; then
-            echo "::set-output name=TAG::${{ github.event.inputs.tag }}"
+            TAG="${{ github.event.inputs.tag }}"
           else
-            # Default tag: YYYYMMDD-commitSHA
-            DATE_TAG=$(date +%Y%m%d)
-            COMMIT_SHA=${GITHUB_SHA::7}
-            echo "::set-output name=TAG::${DATE_TAG}-${COMMIT_SHA}"
+            # Check if the commit is tagged
+            TAG_FROM_GIT=$(git tag --points-at HEAD)
+            if [ -n "$TAG_FROM_GIT" ]; then
+              TAG="$TAG_FROM_GIT"
+            else
+              # Default tag: YYYYMMDD-commitSHA
+              DATE_TAG=$(date +%Y%m%d)
+              COMMIT_SHA=${GITHUB_SHA::7}
+              TAG="${DATE_TAG}-${COMMIT_SHA}"
+            fi
           fi
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
 
       # 5. Build and push the Docker image
       - name: Build and push Docker image
@@ -48,9 +61,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: antoniobriperez/payroll-analyzer:${{ steps.tag.outputs.TAG }}
+          tags: |
+            antoniobriperez/payroll-analyzer:${{ steps.tag.outputs.TAG }}
+            antoniobriperez/payroll-analyzer:latest
 
       # 6. Output the pushed image information
       - name: Image Info
         run: |
           echo "Docker image pushed: antoniobriperez/payroll-analyzer:${{ steps.tag.outputs.TAG }}"
+          echo "Docker image tagged as latest: antoniobriperez/payroll-analyzer:latest"
