@@ -157,10 +157,10 @@ class UNIR:
             first_month = found.group(2)
             first_year = found.group(3)
 
-            return f"{first_day}-{first_month}-{first_year}"
+            return f"{first_year} {first_month} {first_day}"
         else:
             value = self.source_path.stem.split("-")
-            return f"01-{UNIR.meses_numeros.get(value[1])}-{value[2]}"
+            return f"{value[2]} {UNIR.meses_numeros.get(value[1])} 01"
 
     def export_to_json(self):
         import json
