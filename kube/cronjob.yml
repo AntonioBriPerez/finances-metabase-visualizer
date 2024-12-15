@@ -4,7 +4,7 @@ metadata:
   name: payroll-analyzer-cronjob
   namespace: finances
 spec:
-  schedule: "*/1 * * * *"  # Runs every minute
+  schedule: "*/30 * * * *"  # Runs every minute
   concurrencyPolicy: Forbid  # Prevents concurrent runs
   startingDeadlineSeconds: 30  # Time within which the job should start
   jobTemplate:
@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
             - name: payroll-analyzer
-              image: antoniobriperez/payroll-analyzer:v0.0.7  # Replace 'tagname' appropriately
+              image: antoniobriperez/payroll-analyzer:v0.0.8  # Replace 'tagname' appropriately
               imagePullPolicy: IfNotPresent
               envFrom:
                 - configMapRef:
