@@ -113,19 +113,8 @@ class UST:
             mes_fin = coincidencia.group(5)
             año_fin = coincidencia.group(6)
             # Imprimir el resultado
-            return self.__convertir_fecha(f"{dia_fin} {mes_fin} {año_fin}")
+            return f"{año_fin}-{UST.meses_numeros.get(mes_fin, 'Mes no valido')}-01"
 
-    @staticmethod
-    def __convertir_fecha(fecha):
-        # Dividir la cadena de fecha por espacio
-        partes = fecha.split()
-
-        # El mes es la segunda parte (índice 1) y el año es la tercera parte (índice 2)
-        mes = partes[1]
-        año = partes[2]
-
-        # Convertir el mes a su abreviatura
-        return f"{año}-{UST.meses_numeros.get(mes, "Mes no valido")}-01"
 
     def convert_to_pd():
         pass
