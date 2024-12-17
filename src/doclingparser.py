@@ -17,10 +17,10 @@ def parse_nomina(nomina_path: str) -> pd.DataFrame:
                 "salario_neto": nomina_unir.salario_neto,
                 "salario_bruto": nomina_unir.salario_bruto,
                 "mes": nomina_unir.mes,
+                "posicion_interna": nomina_unir.posicion_interna,
             },
             index=[0],
         )
-        print(df)
         return df
 
     elif "ust" in nomina_path.lower():
@@ -33,9 +33,10 @@ def parse_nomina(nomina_path: str) -> pd.DataFrame:
                 "salario_neto": nomina_ust.salario_neto,
                 "salario_bruto": nomina_ust.salario_bruto,
                 "mes": nomina_ust.mes,
+                "posicion_interna": nomina_ust.posicion_interna,
             },
             index=[0],
         )
-        print(df)
+        
         return df
     os.remove(nomina_path)

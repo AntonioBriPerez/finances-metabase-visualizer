@@ -118,7 +118,21 @@ class UST:
 
     def convert_to_pd():
         pass
-
+    
+    @property
+    def posicion_interna(self):
+        return self.extraerPosicionInterna()
+    def extraerPosicionInterna(self):
+        diccionario = self.data["tables"][0]
+        for item in diccionario["data"]["table_cells"]:
+            bbox = item.get("bbox", {})
+            match_count = sum(
+                math.floor(bbox.get(dim, -1))
+                == int(self.config["posicion_interna_UST_bbox"][dim])
+                for dim in ["l", "t", "r", "b"]
+            )
+            if match_count >= 3:
+                return item["text"]
     def export_to_json(self):
         import json
         import random

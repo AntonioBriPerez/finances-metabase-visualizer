@@ -3,7 +3,7 @@
 *.csv
 *.xlsx
 *.xls	
-*.env
+*.env*
 *.txt
 __pycache__/
 !requirements.txt

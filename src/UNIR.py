@@ -44,6 +44,11 @@ class UNIR:
         self.__r_bruto = int(self.config["salario_bruto_UNIR_bbox"]["r"])
         self.__b_bruto = int(self.config["salario_bruto_UNIR_bbox"]["b"])
 
+        self.__l_posicion_interna = int(self.config["posicion_interna_UNIR_bbox"]["l"])
+        self.__t_posicion_interna = int(self.config["posicion_interna_UNIR_bbox"]["t"])
+        self.__r_posicion_interna = int(self.config["posicion_interna_UNIR_bbox"]["r"])
+        self.__b_posicion_interna = int(self.config["posicion_interna_UNIR_bbox"]["b"])
+
         self.source_path = Path(file)
         pipeline_options = PdfPipelineOptions(do_table_structure=True)
         pipeline_options.table_structure_options.mode = (
@@ -78,6 +83,10 @@ class UNIR:
             raise AssertionError(e)
 
     @property
+    def posicion_interna(self):
+        return self.extraerPosicionInterna()
+    
+    @property
     def salario_neto(self: float) -> float:
         return self.extraerSalarioNeto()
 
@@ -106,9 +115,8 @@ class UNIR:
                         for key, value in zip(["l", "t", "r", "b"], [l, t, r, b])
                     )
                     if match_count >= 3:
-                        return float(
-                            item["text"].replace(".", "").replace(",", ".").split()[0]
-                        )
+                        return item["text"]
+                        
         return None
 
     def __find_on_texts(self, l, t, r, b):
@@ -120,30 +128,37 @@ class UNIR:
                         for key, value in zip(["l", "t", "r", "b"], [l, t, r, b])
                     )
                     if match_count >= 3:
-                        return float(
-                            item["text"].replace(".", "").replace(",", ".").split()[0]
-                        )
+                        return item["text"]
+                        
         return None
 
+    def extraerPosicionInterna(self):
+        resultado = self.__find_on_texts(self.__l_posicion_interna, self.__t_posicion_interna, self.__r_posicion_interna, self.__b_posicion_interna)
+        if resultado is None:
+            resultado = self.__find_on_table_cells(self.__l_posicion_interna, self.__t_posicion_interna, self.__r_posicion_interna, self.__b_posicion_interna)
+        return resultado
     def extraerSalarioNeto(self):
         resultado = self.__find_on_texts(
             self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto
         )
         if resultado is None:
-            resultado = self.__find_on_table_cells(
+            return float(self.__find_on_table_cells(
                 self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto
-            )
-        return resultado
+            ).replace(".", "").replace(",", ".").split()[0])
+        return float(resultado.replace(".", "").replace(",", ".").split()[0])
 
     def extraerSalarioBruto(self):
         resultado = self.__find_on_texts(
             self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto
         )
         if resultado is None:
-            resultado = self.__find_on_table_cells(
+            return float(self.__find_on_table_cells(
                 self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto
-            )
-        return resultado
+            ).replace(".", "").replace(",", ".").split()[0])
+        #if resultado is float
+        if isinstance(resultado, float):
+            return resultado
+        return float(resultado.replace(".", "").replace(",", ".").split()[0])
 
     def extraerMes(self):
         import re
