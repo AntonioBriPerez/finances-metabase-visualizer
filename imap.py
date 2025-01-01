@@ -133,7 +133,9 @@ def main():
                 logging.warning(f"Error: {e}")
 
                 continue
-            db.insert_dataframe(df, os.getenv("PG_TABLE"), if_exists="append", index=False)
+            db.insert_dataframe(
+                df, os.getenv("PG_TABLE"), if_exists="append", index=False
+            )
             logging.info(f"Parsed payroll file: {p}")
     except Exception as e:
         logging.error(f"An unknown error occurred: {e}")
