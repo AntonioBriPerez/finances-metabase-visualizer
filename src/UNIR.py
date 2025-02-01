@@ -1,4 +1,5 @@
 from pathlib import Path
+from .BoundingBox import BoundingBox
 from docling.document_converter import DocumentConverter
 from docling.datamodel.base_models import InputFormat
 from docling.document_converter import DocumentConverter, PdfFormatOption
@@ -6,6 +7,7 @@ from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMo
 import configparser
 import math
 import os
+
 os.environ["TQDM_DISABLE"] = "1"
 
 
@@ -34,15 +36,6 @@ class UNIR:
 
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
-        self.__l_neto = int(self.config["salario_neto_UNIR_bbox"]["l"])
-        self.__t_neto = int(self.config["salario_neto_UNIR_bbox"]["t"])
-        self.__r_neto = int(self.config["salario_neto_UNIR_bbox"]["r"])
-        self.__b_neto = int(self.config["salario_neto_UNIR_bbox"]["b"])
-
-        self.__l_bruto = int(self.config["salario_bruto_UNIR_bbox"]["l"])
-        self.__t_bruto = int(self.config["salario_bruto_UNIR_bbox"]["t"])
-        self.__r_bruto = int(self.config["salario_bruto_UNIR_bbox"]["r"])
-        self.__b_bruto = int(self.config["salario_bruto_UNIR_bbox"]["b"])
 
         self.source_path = Path(file)
         pipeline_options = PdfPipelineOptions(do_table_structure=True)
@@ -78,6 +71,10 @@ class UNIR:
             raise AssertionError(e)
 
     @property
+    def posicion_interna(self) -> str:
+        return self.extraerPosicionInterna()
+
+    @property
     def salario_neto(self: float) -> float:
         return self.extraerSalarioNeto()
 
@@ -91,12 +88,22 @@ class UNIR:
 
     def extraerSalarioNeto(self):
         resultado = None
-        resultado = self.__find_on_texts()
+        resultado = self.__find_on_texts(
+            BoundingBox(self.config["salario_neto_UNIR_bbox"])
+        )
         if resultado is None:
-            resultado = self.__find_on_table_cells()
+            resultado = self.__find_on_table_cells(
+                BoundingBox(self.config["salario_neto_UNIR_bbox"])
+            )
         return resultado
 
-    def __find_on_table_cells(self, l, t, r, b):
+    def __find_on_table_cells(self, bbox: BoundingBox):
+        l, t, r, b = (
+            bbox.l,
+            bbox.t,
+            bbox.r,
+            bbox.b,
+        )
         diccionario = self.data["tables"][0]
         for item in diccionario["data"]["table_cells"]:
             for k, v in item.items():
@@ -106,12 +113,17 @@ class UNIR:
                         for key, value in zip(["l", "t", "r", "b"], [l, t, r, b])
                     )
                     if match_count >= 3:
-                        return float(
-                            item["text"].replace(".", "").replace(",", ".").split()[0]
-                        )
+                        return item["text"]
+
         return None
 
-    def __find_on_texts(self, l, t, r, b):
+    def __find_on_texts(self, bbox: BoundingBox):
+        l, t, r, b = (
+            bbox.l,
+            bbox.t,
+            bbox.r,
+            bbox.b,
+        )
         for item in self.data["texts"]:
             for _, v in item.items():
                 if isinstance(v, list) and len(v) > 0:
@@ -120,30 +132,52 @@ class UNIR:
                         for key, value in zip(["l", "t", "r", "b"], [l, t, r, b])
                     )
                     if match_count >= 3:
-                        return float(
-                            item["text"].replace(".", "").replace(",", ".").split()[0]
-                        )
+                        return item["text"]
+
         return None
+
+    def extraerPosicionInterna(self):
+        resultado = self.__find_on_texts(
+            BoundingBox(self.config["posicion_interna_UNIR_bbox"])
+        )
+        if resultado is None:
+            resultado = self.__find_on_table_cells(
+                BoundingBox(self.config["posicion_interna_UNIR_bbox"])
+            )
+        return resultado
 
     def extraerSalarioNeto(self):
         resultado = self.__find_on_texts(
-            self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto
+            BoundingBox(self.config["salario_neto_UNIR_bbox"])
         )
         if resultado is None:
-            resultado = self.__find_on_table_cells(
-                self.__l_neto, self.__t_neto, self.__r_neto, self.__b_neto
+            return float(
+                self.__find_on_table_cells(
+                    BoundingBox(self.config["salario_neto_UNIR_bbox"])
+                )
+                .replace(".", "")
+                .replace(",", ".")
+                .split()[0]
             )
-        return resultado
+        return float(resultado.replace(".", "").replace(",", ".").split()[0])
 
     def extraerSalarioBruto(self):
         resultado = self.__find_on_texts(
-            self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto
+            BoundingBox(self.config["salario_bruto_UNIR_bbox"])
         )
         if resultado is None:
-            resultado = self.__find_on_table_cells(
-                self.__l_bruto, self.__t_bruto, self.__r_bruto, self.__b_bruto
+            return float(
+                self.__find_on_table_cells(
+                    BoundingBox(self.config["salario_bruto_UNIR_bbox"])
+                )
+                .replace(".", "")
+                .replace(",", ".")
+                .split()[0]
             )
-        return resultado
+        # if resultado is float
+        if isinstance(resultado, float):
+            return resultado
+        return float(resultado.replace(".", "").replace(",", ".").split()[0])
 
     def extraerMes(self):
         import re

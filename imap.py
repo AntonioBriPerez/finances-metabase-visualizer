@@ -23,7 +23,7 @@ def download_payroll_attachments(email_message, download_path=None, db=None):
     os.makedirs(download_path, exist_ok=True)
 
     downloaded_attachments = []
-    existing_hashes = set(db.get_existing_hashes("nominas"))
+    existing_hashes = set(db.get_existing_hashes(os.getenv("PG_TABLE")))
 
     for part in email_message.walk():
         if part.get_content_maintype() == "multipart":
@@ -133,7 +133,9 @@ def main():
                 logging.warning(f"Error: {e}")
 
                 continue
-            db.insert_dataframe(df, "nominas", if_exists="append", index=False)
+            db.insert_dataframe(
+                df, os.getenv("PG_TABLE"), if_exists="append", index=False
+            )
             logging.info(f"Parsed payroll file: {p}")
     except Exception as e:
         logging.error(f"An unknown error occurred: {e}")

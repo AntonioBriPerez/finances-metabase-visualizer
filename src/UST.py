@@ -6,7 +6,9 @@ from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMo
 import math
 import configparser
 import os
+
 os.environ["TQDM_DISABLE"] = "1"
+
 
 class UST:
     meses_numeros = {
@@ -50,8 +52,12 @@ class UST:
         file_name = file.name
         try:
             assert file_name.endswith(".pdf"), f"El archivo {file_name} no es un PDF"
-            assert len(file_name.split("-")) == 3, f"El archivo {file_name} no tiene el formato correcto"
-            assert file_name.split("-")[0] == "ust", f"El archivo{file_name}  no es de UST"
+            assert (
+                len(file_name.split("-")) == 3
+            ), f"El archivo {file_name} no tiene el formato correcto"
+            assert (
+                file_name.split("-")[0] == "ust"
+            ), f"El archivo{file_name}  no es de UST"
             assert (
                 file_name.split("-")[1].capitalize() in UST.meses_numeros.keys()
             ), "El mes no es válido"
@@ -62,17 +68,31 @@ class UST:
             raise AssertionError(e)
 
     @property
-    def salario_neto(self: float) -> float:
+    def salario_neto(self) -> float:
         return self.extraerSalarioNeto()
 
     @property
-    def salario_bruto(self: float) -> float:
+    def salario_base(self) -> float:
+        return self.extraerSalarioBase()
+    @property
+    def salario_bruto(self) -> float:
         return self.extraerSalarioBruto()
 
     @property
     def mes(self):
         return self.extraerMes()
 
+    def extraerSalarioBase(self):
+        diccionario = self.data["tables"][0]
+        for item in diccionario["data"]["table_cells"]:
+            bbox = item.get("bbox", {})
+            match_count = sum(
+                math.floor(bbox.get(dim, -1))
+                == int(self.config["salario_base_UST_bbox"][dim])
+                for dim in ["l", "t", "r", "b"]
+            )
+            if match_count >= 3:
+                return float(item["text"].replace(".", "").replace(",", "."))
     def extraerSalarioNeto(self):
         for item in self.data["texts"]:
             for k, v in item.items():
@@ -115,9 +135,32 @@ class UST:
             # Imprimir el resultado
             return f"{año_fin}-{UST.meses_numeros.get(mes_fin, 'Mes no valido')}-01"
 
-
     def convert_to_pd():
         pass
+
+    @property
+    def posicion_interna(self):
+        return self.extraerPosicionInterna()
+
+    def extraerPosicionInterna(self):
+        diccionario = self.data["tables"][0]
+        for item in diccionario["data"]["table_cells"]:
+            bbox = item.get("bbox", {})
+            match_count = sum(
+                abs(
+                    math.floor(bbox.get(dim, -1))
+                    - int(self.config["posicion_interna_UST_bbox"][dim])
+                )
+                <= float(
+                    self.config["bbox_tolerances"][
+                        "ust_posicion_interna_bbox_tolerance"
+                    ]
+                )
+                * int(self.config["posicion_interna_UST_bbox"][dim])
+                for dim in ["l", "t", "r", "b"]
+            )
+            if match_count >= 3:
+                return item["text"]
 
     def export_to_json(self):
         import json
