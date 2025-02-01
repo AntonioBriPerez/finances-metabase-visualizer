@@ -9,7 +9,7 @@ import os
 def parse_nomina(nomina_path: str) -> pd.DataFrame:
     if "unir" in nomina_path.lower():
         nomina_unir = UNIR(nomina_path, config_file="config.ini")
-        return pd.DataFrame(
+        df = pd.DataFrame(
             {
                 "fichero": Path(nomina_path).stem,
                 "hash_fichero": generar_hash_archivo(nomina_path),
@@ -21,11 +21,12 @@ def parse_nomina(nomina_path: str) -> pd.DataFrame:
             },
             index=[0],
         )
+        print(df)
+        return df
 
     elif "ust" in nomina_path.lower():
         nomina_ust = UST(nomina_path, config_file="config.ini")
-        nomina_ust.export_to_json()
-        return pd.DataFrame(
+        df = pd.DataFrame(
             {
                 "fichero": Path(nomina_path).stem,
                 "hash_fichero": generar_hash_archivo(nomina_path),
@@ -39,4 +40,5 @@ def parse_nomina(nomina_path: str) -> pd.DataFrame:
             index=[0],
         )
 
+        return df
     os.remove(nomina_path)
