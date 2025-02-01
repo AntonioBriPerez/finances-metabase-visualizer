@@ -68,17 +68,31 @@ class UST:
             raise AssertionError(e)
 
     @property
-    def salario_neto(self: float) -> float:
+    def salario_neto(self) -> float:
         return self.extraerSalarioNeto()
 
     @property
-    def salario_bruto(self: float) -> float:
+    def salario_base(self) -> float:
+        return self.extraerSalarioBase()
+    @property
+    def salario_bruto(self) -> float:
         return self.extraerSalarioBruto()
 
     @property
     def mes(self):
         return self.extraerMes()
 
+    def extraerSalarioBase(self):
+        diccionario = self.data["tables"][0]
+        for item in diccionario["data"]["table_cells"]:
+            bbox = item.get("bbox", {})
+            match_count = sum(
+                math.floor(bbox.get(dim, -1))
+                == int(self.config["salario_base_UST_bbox"][dim])
+                for dim in ["l", "t", "r", "b"]
+            )
+            if match_count >= 3:
+                return float(item["text"].replace(".", "").replace(",", "."))
     def extraerSalarioNeto(self):
         for item in self.data["texts"]:
             for k, v in item.items():

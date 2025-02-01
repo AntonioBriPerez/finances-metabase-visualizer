@@ -34,6 +34,7 @@ def parse_nomina(nomina_path: str) -> pd.DataFrame:
                 "salario_bruto": nomina_ust.salario_bruto,
                 "mes": nomina_ust.mes,
                 "posicion_interna": nomina_ust.posicion_interna,
+                "salario_base": nomina_ust.salario_base,
             },
             index=[0],
         )
